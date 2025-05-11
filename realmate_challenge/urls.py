@@ -1,22 +1,44 @@
-"""
-URL configuration for realmate_challenge project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.1/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
+from realmate_challenge.apps.conversation.views import (
+    ConversationViewSet,
+    conversation_list_view,
+    conversation_detail_view,
+    live_conversation_view,
+)
+
+from realmate_challenge.apps.message.views import MessageViewSet
+from realmate_challenge.webhooks.messages.views import WebhookView
+
+
+# Router REST
+router = DefaultRouter()
+router.register("conversations", ConversationViewSet, basename="conversation")
+router.register("messages", MessageViewSet, basename="message")
+
+# URL Patterns
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    # Admin
+    path("admin/", admin.site.urls),
+
+    # API REST
+    path("", include(router.urls)),
+    path("webhook/", WebhookView.as_view(), name="webhook"),
+
+    # Frontend com Django Templates
+    path("conversas/", conversation_list_view, name="conversation_list"),
+    path("conversas/<uuid:pk>/", conversation_detail_view, name="conversation_detail"),
+
+    # DIFERENCIAL: Chat ao vivo 
+    # com WebSocket e Channels 
+    # comando poetry run runserver reescrito para rodar o ASGI
+    path("conversas/<uuid:pk>/ao-vivo/", live_conversation_view, name="live_conversation"),
+]
+
+urlpatterns += [
+    path("schema/", SpectacularAPIView.as_view(), name="schema"),
+    path("docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
 ]

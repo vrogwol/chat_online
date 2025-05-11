@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Conversa ao vivo</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 2rem; }
+        ul { list-style-type: none; padding: 0; }
+        li { margin-bottom: 1rem; padding: 0.5rem; border-radius: 5px; max-width: 80%; }
+        .sent { background-color: #d1e7dd; text-align: right; margin-left: auto; }
+        .received { background-color: #f8d7da; text-align: left; margin-right: auto; }
+        .timestamp { display: block; font-size: 0.8rem; color: #555; margin-top: 0.3rem; }
+    </style>
+</head>
+<body>
+    <h2>Conversa ao vivo: {{ conversation_id }}</h2>
+    <ul id="messages">
+        {% for msg in messages %}
+        <li class="{{ msg.direction|lower }}">
+            {{ msg.content }}
+            <span class="timestamp">{{ msg.timestamp }}</span>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <script>
+        const conversationId = "{{ conversation_id }}";
+        const socket = new WebSocket(`ws://${window.location.host}/ws/conversations/${conversationId}/`);
+
+        socket.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            const messagesList = document.getElementById("messages");
+
+            const li = document.createElement("li");
+            li.className = data.direction.toLowerCase();
+            li.innerHTML = `
+                ${data.content}
+                <span class="timestamp">${data.timestamp}</span>
+            `;
+            messagesList.appendChild(li);
+            window.scrollTo(0, document.body.scrollHeight);
+        };
+    </script>
+</body>
+</html>

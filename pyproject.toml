@@ -5,8 +5,10 @@ description = ""
 authors = [{ name = "Seu nome aqui", email = "seu.email@email.com.br" }]
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = ["django (>=5.1.6,<6.0.0)"]
+dependencies = ["django (>=5.1.6,<6.0.0)", "djangorestframework (>=3.16.0,<4.0.0)", "drf-spectacular (>=0.28.0,<0.29.0)", "channels (>=4.2.2,<5.0.0)", "daphne (>=4.1.2,<5.0.0)"]
 
+[tool.poetry.scripts]
+runserver = "realmate_challenge.__daphne__:main"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
